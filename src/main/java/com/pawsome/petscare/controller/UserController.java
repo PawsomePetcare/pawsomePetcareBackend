@@ -5,8 +5,11 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +23,7 @@ import com.pawsome.petscare.repo.UserHashMapRepo;
 import com.pawsome.petscare.repo.UsersRepo;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/users")
 public class UserController {
 
@@ -28,6 +32,15 @@ public class UserController {
 
 	@Autowired
 	UserHashMapRepo userHashMapRepo;
+
+	@GetMapping("/validateUser")
+	public ResponseEntity<String> validateUser(@RequestParam ("userId") String userId , @RequestParam("password") String password) {
+		Optional<User> optUser = userRepo.findByNameAndPassword(userId, password);
+		if(optUser.isPresent()) {
+			return new ResponseEntity<String>("SUCCESS", HttpStatus.OK);			
+		}
+		return new ResponseEntity<String>("FAILURE", HttpStatus.BAD_REQUEST);
+	}
 	
 	
 	@PostMapping("/save")

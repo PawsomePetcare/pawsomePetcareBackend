@@ -3,8 +3,6 @@ package com.pawsome.petscare.dto;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@NoArgsConstructor
 public class ServicesDto {
 
 	

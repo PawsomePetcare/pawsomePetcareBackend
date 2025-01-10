@@ -37,6 +37,9 @@ public class User  implements Serializable{
 	@Column(name="V_EMAIL_ID")
 	private String emailId;
 	
+	@Column(name="V_PASSWORD")
+	private String password;
+	
 	public Integer getUserId() {
 		return userId;
 	}
