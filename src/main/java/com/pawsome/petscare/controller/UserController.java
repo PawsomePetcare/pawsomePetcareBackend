@@ -34,12 +34,28 @@ public class UserController {
 	UserHashMapRepo userHashMapRepo;
 
 	@GetMapping("/validateUser")
-	public ResponseEntity<String> validateUser(@RequestParam ("userId") String userId , @RequestParam("password") String password) {
-		Optional<User> optUser = userRepo.findByNameAndPassword(userId, password);
+	public ResponseEntity<User> validateUser(@RequestParam ("userId") String userId , @RequestParam("password") String password) {
+		Optional<User> optUser = userRepo.findByEmailIdAndPassword(userId, password);
 		if(optUser.isPresent()) {
-			return new ResponseEntity<String>("SUCCESS", HttpStatus.OK);			
+			return new ResponseEntity<User>(optUser.get(), HttpStatus.OK);			
 		}
-		return new ResponseEntity<String>("FAILURE", HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<User>(new User(), HttpStatus.BAD_REQUEST);
+	}
+	
+	@GetMapping("/addUser")
+	public ResponseEntity<User> addUser(@RequestParam ("userId") String userId , @RequestParam("password") String password, @RequestParam("name") String name) {
+		try {
+		Integer lastUserId = userRepo.findLastUserId();
+		User user = new User(lastUserId+1, name, userId, password);
+		User save = userRepo.save(user);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("ddMMyyhhmmss");
+		String timeStamp = simpleDateFormat.format(new Date());
+		saveUserHash(timeStamp, save);
+		return new ResponseEntity<User>(save, HttpStatus.CREATED);
+		}catch(Exception e) {
+			return new ResponseEntity<User>(new User(), HttpStatus.BAD_REQUEST);			
+		}
+
 	}
 	
 	
@@ -49,13 +65,17 @@ public class UserController {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("ddMMyyhhmmss");	
 		String timeStamp = simpleDateFormat.format(new Date());
 		User savedUser = userRepo.saveAndFlush(user);
+		saveUserHash(timeStamp, savedUser);
+		return savedUser;
+	}
+
+	private void saveUserHash(String timeStamp, User savedUser) {
 		UserHashMap userHash = new UserHashMap();
 		userHash.setUserId(savedUser.getUserId());
 		
 		userHash.setHashCode(String.valueOf(savedUser.hashCode()).substring(0, 6)+"_"+savedUser.getUserId()
 				+timeStamp);
 		userHashMapRepo.save(userHash);
-		return savedUser;
 	}
 	
 	@GetMapping("/userById")

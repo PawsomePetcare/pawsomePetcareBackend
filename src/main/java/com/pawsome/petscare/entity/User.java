@@ -20,13 +20,6 @@ public class User  implements Serializable{
 
 	private static final long serialVersionUID = 8824194203005708346L;
 
-	
-	
-	public User() {
-		super();
-	}
-
-
 	@Id
 	@Column(name="N_USER_ID")
 	private Integer userId;	
@@ -61,6 +54,18 @@ public class User  implements Serializable{
 
 	public void setEmailId(String emailId) {
 		this.emailId = emailId;
+	}
+
+	public User() {
+		super();
+	}
+	
+	public User(Integer userId, String name, String emailId, String password) {
+		super();
+		this.userId = userId;
+		this.name = name;
+		this.emailId = emailId;
+		this.password = password;
 	}	
 	
 	
