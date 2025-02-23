@@ -1,5 +1,7 @@
 package com.pawsome.petscare.dto;
 
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -36,7 +38,46 @@ public class ServicesDto {
 	
 	private Integer userId;
 
+	private Integer quantity;
 	
+    private Date checkoutDate;
+	
+	private Date checkinDate;
+	
+    private Double total;
+    
+	public Integer getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
+	}
+
+	public Date getCheckoutDate() {
+		return checkoutDate;
+	}
+
+	public void setCheckoutDate(Date checkoutDate) {
+		this.checkoutDate = checkoutDate;
+	}
+
+	public Date getCheckinDate() {
+		return checkinDate;
+	}
+
+	public void setCheckinDate(Date checkinDate) {
+		this.checkinDate = checkinDate;
+	}
+
+	public Double getTotal() {
+		return total;
+	}
+
+	public void setTotal(Double total) {
+		this.total = total;
+	}
+
 	public Integer getUserId() {
 		return userId;
 	}

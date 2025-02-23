@@ -41,24 +41,26 @@ public class CartController {
 	@Autowired
 	ServicesService servicesService;
 
-	@GetMapping("/checkoutServices")
-	@Transactional
-	public List<ServicesDto> checkoutServices(@RequestParam Integer userId) throws Exception {
-		Optional<UserHashMap> userhash = userHashMapRepo.findByUserId(userId);
-		if(userhash.isPresent()) {
-			List<Cart> carts = cartRepo.findByCartStatusAndUserHashId(CartStatus.ADDED.toString(), userhash.get().getHashMapId());
-			ArrayList<Cart> cartsUpdated = new ArrayList<Cart>();
-			
-			carts.forEach((i) -> {
-				i.setCartStatus(CartStatus.COMPLETED.toString());
-				cartsUpdated.add(i);
-			});
-			
-			cartRepo.saveAll(cartsUpdated);
-			return new ArrayList<ServicesDto>();
-		}
-		return getAllByStatus(userId, CartStatus.ADDED.toString());
-	}
+	   @PostMapping("/checkoutServices")
+	    @Transactional
+	    public List<ServicesDto> checkoutServices(@RequestParam Integer userId, @RequestBody List<Cart> cartDetails) throws Exception {
+	        Optional<UserHashMap> userhash = userHashMapRepo.findByUserId(userId);
+	        if(userhash.isPresent()) {
+				List<Cart> carts = cartRepo.findByCartStatusAndUserHashId(CartStatus.ADDED.toString(), userhash.get().getHashMapId());
+	            for (Cart cart : cartDetails) {
+	            	Optional<Cart> any = carts.stream().filter(i -> i.getServiceId().equals(cart.getServiceId())).findAny();
+	            	if(any.isPresent()) {
+	                cart.setCartStatus(CartStatus.BOOKED.toString());
+	                cart.setUserHashId(userhash.get().getHashMapId());
+	                cart.setCartId(any.get().getCartId());
+	                
+	            	}
+	            }
+	            cartRepo.saveAll(cartDetails);
+	            return new ArrayList<ServicesDto>();
+	        }
+	        return getAllByStatus(userId, CartStatus.ADDED.toString());
+	    }
 	
 	
 	@GetMapping("/completedServices")
@@ -104,7 +106,16 @@ public class CartController {
 				List<ServicesDetails> details = servicesService.getAllServicesDetailsByMultiId(servicesId);
 				if(!details.isEmpty()) {
 				details.forEach((i) -> {
-					list.add(new ServicesDto(i.getServiceid(),i.getDescription(), i.getTitle(),i.getPrice(), CartStatus.valueOf(status.toUpperCase()).toString(), i.getImageId(), userId));
+					ServicesDto servicesDto = new ServicesDto(i.getServiceid(),i.getDescription(), i.getTitle(),i.getPrice(), CartStatus.valueOf(status.toUpperCase()).toString(), i.getImageId(), userId);
+					Optional<Cart> first = carts.stream().filter(j -> i.getServiceid().equals(j.getServiceId())).findFirst();
+					if(first.isPresent()) {
+						servicesDto.setTotal(first.get().getTotal());
+						servicesDto.setCheckinDate(first.get().getCheckinDate());
+						servicesDto.setCheckoutDate(first.get().getCheckoutDate());
+						servicesDto.setQuantity(first.get().getQuantity());
+					}
+					
+					list.add(servicesDto);
 				});
 				}
 			}
